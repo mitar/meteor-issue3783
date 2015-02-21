@@ -18,7 +18,7 @@ if (Meteor.isClient) {
 
   collection.find().observe({
     changed: function (newDocument, oldDocument) {
-      console.log("changed", newDocument, oldDocument);
+      console.log("changed", EJSON.equals(newDocument, oldDocument), newDocument, oldDocument);
     }
   })
 }
@@ -30,20 +30,18 @@ else {
 
 Meteor.methods({
   increase: function () {
-    var random = Random.id();
-    collection.update({
-      counter: {
-        $not: {
-          $elemMatch: {
-            random: random
-          }
-        }
-      }
-    }, {
+    var id = collection.findOne().counter.length;
+
+    function Document(id) {
+      this.id = id;
+      this.foobar = function () {};
+    }
+
+    console.log(new Document(id));
+
+    collection.update({}, {
       $addToSet: {
-        counter: {
-          random: random
-        }
+        counter: new Document(id)
       }
     });
   }
